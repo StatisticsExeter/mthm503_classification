@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+
+set -e
+
+VERBOSE=false
+
+if [ "$2" = "verbose" ]; then
+    VERBOSE=true
+fi
+
+run_tests() {
+    test_file=$1
+
+    if [ "$VERBOSE" = true ]; then
+        pytest -v "$test_file"
+    else
+        pytest -v --tb=no "$test_file"
+    fi
+}
+
+check_syntax() {
+    echo
+    echo "Checking Python syntax..."
+    echo
+
+    python -m compileall src/supervised
+    python -m compileall src/unsupervised
+
+    echo
+    echo "✓ No syntax errors found"
+}
+
+check_critical_errors() {
+    echo
+    echo "Checking for critical coding errors..."
+    echo
+
+    flake8 \
+        --select=E9,F63,F7,F82 \
+        src/supervised src/unsupervised
+
+    echo
+    echo "✓ No critical coding errors found"
+}
+
+run_linter() {
+    echo
+    echo "Running code quality checks..."
+    echo
+
+    flake8 src/supervised src/unsupervised
+
+    echo
+    echo "✓ No linting issues found"
+}
+
+run_pipeline() {
+    check_syntax
+    check_critical_errors
+
+    for test_file in "$@"; do
+        echo
+        echo "Running $(basename "$test_file")..."
+        echo
+
+        run_tests "$test_file"
+    done
+
+    echo
+    echo "✓ All tests passed"
+
+    run_linter
+
+    echo
+    echo "✓ Ready to commit and push"
+}
+
+case "$1" in
+
+    super)
+        run_pipeline src/supervised/tests/test_supervised_core.py
+        ;;
+
+    unsuper)
+        run_pipeline src/unsupervised/tests/test_unsupervised_core.py
+        ;;
+
+    all)
+        run_pipeline \
+            src/supervised/tests/test_supervised_core.py \
+            src/unsupervised/tests/test_unsupervised_core.py
+        ;;
+
+    check)
+        python verify.py
+        ;;
+
+    help)
+         echo
+echo "Available commands:"
+echo
+echo " ./run check"
+echo " Verify your Python environment"
+echo
+echo " ./run super"
+echo " Run supervised classification checks"
+echo
+echo " ./run unsuper"
+echo " Run unsupervised classification checks"
+echo
+echo " ./run all"
+echo " Run all checks"
+echo
+echo "Optional verbose output:"
+echo
+echo " ./run super verbose"
+echo " ./run unsuper verbose"
+echo " ./run all verbose"
+echo
+;;
+
+*)
+echo
+echo "I don't recognise that command."
+echo
+echo "Try:"
+echo " ./run help"
+echo
+exit 1
+;;
+
+esac

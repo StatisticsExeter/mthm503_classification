@@ -1,0 +1,117 @@
+---
+title: "Clustering local authorities by road collision patterns"
+subtitle: "An application of unsupervised learning"
+author: "Anonymous"
+format:
+  html:
+    embed-resources: true
+standalone: true
+---
+
+```{python}
+#| echo: false
+from pathlib import Path
+import pandas as pd
+
+
+def check_exists(path):
+    path = Path(path)
+
+    if not path.exists():
+        print(f"ERROR: Could not find resource: {path}")
+        print("Please check that:")
+        print("  - The file exists")
+        print("  - The path is correct")
+        print("  - Any previous pipeline stages have completed successfully")
+        print()
+        print(
+            "If you have left it too late before a deadline to ask for "
+            "help resolving this issue, please include the missing "
+            "artefact separately in your coursework submission."
+        )
+        return False
+
+    return True
+```
+
+
+## Your Task
+
+This report explores patterns in police-recorded road collision data (Stats19) to group similar Local Authorities based on their specific infrastructure and environmental risk profiles.
+
+**Academic Requirement:** You should demonstrate an understanding of *why* we undertake cluster analysis and what the various methods reveal. Specifically, explain how **Principal Component Analysis (PCA)** allows us to project high-dimensional data (multiple collision types) into a 2D plane for visual validation of the clusters.
+
+---
+
+## The Problem
+
+The "Stats19" dataset provides a granular view of road safety in Great Britain, structured into three relational tables: **Accidents**, **Vehicles**, and **Casualties**. These are linked via a unique accident index.
+
+We are interested in identifying "sibling" authorities—those that share similar collision characteristics. For this analysis, we utilize counts of collisions occurring under specific conditions:
+* Mini-roundabouts
+* Adverse weather (Rain)
+* Poor lighting (Dark)
+* Standard conditions (Dry/Urban)
+* Severity profiles (Slight injuries)
+
+### Contextual Research
+* [Cluster analysis in Road Safety](https://ijirt.org/publishedpaper/IJIRT175966_PAPER.pdf)
+* [Pattern Identification via Clustering](https://www.researchgate.net/publication/357727987_Identification_of_Traffic_Accident_Patterns_via_Cluster_Analysis_and_Test_Scenario_Development_for_Autonomous_Vehicles)
+
+---
+
+## Exploratory Data Analysis
+
+Before clustering, we examine the raw relationships between variables. We normalize the data by calculating the proportion of each subtype relative to total collisions and apply standard scaling to ensure no single variable (with a larger absolute range) dominates the distance calculations.
+
+![Initial Scatter Matrix of Collision Proportions](../../artefacts/unsupervised/lab/scatterplot.jpg)
+
+---
+
+## Hierarchical Clustering
+
+Hierarchical clustering allows us to see the "taxonomy" of Local Authorities. By using a bottom-up (agglomerative) approach with Ward's linkage, we minimize the variance within each cluster.
+
+### Dendrogram Analysis
+The dendrogram below illustrates the mergers between authorities. You must select a suitable "cut-point" (horizontal height) to define the final number of clusters.
+
+![Dendrogram of Local Authority Clusters](../../artefacts/unsupervised/lab/dendrogram.jpg)
+
+### Visualizing Cluster Membership (PCA)
+To verify if these hierarchical clusters actually represent distinct groups in the data, we project the high-dimensional data onto the first two Principal Components.
+
+![Hierarchical Clusters projected on PCA Space](../../artefacts/unsupervised/lab/hcluster_scatter.jpg)
+
+---
+
+## K-Means Clustering
+
+Unlike hierarchical methods, K-Means requires us to specify $k$ (the number of clusters) upfront. We analyze the **Centroids** to understand the "profile" of each group.
+
+### Cluster Centroids
+These bar charts show the average characteristic for each cluster in the original units (proportions).
+
+![Centroids: Primary Features](../../artefacts/unsupervised/lab/kmeans_1.jpg)
+![Centroids: Secondary Features](../../artefacts/unsupervised/lab/kmeans_1.jpg)
+
+### PCA Visual Verification
+Again, we use PCA to observe the spatial separation of the K-Means groups.
+
+![K-Means Clusters projected on PCA Space](../../artefacts/unsupervised/lab/kmeans_scatter.jpg)
+
+---
+
+## Additional Credit
+
+To enhance this analysis, consider:
+1.  Implementing a third unsupervised method (e.g., DBSCAN for density-based grouping).
+2.  Expanding the feature set to include road surface types or driver age demographics.
+3.  Answering: *Do the clusters align with known geographical regions, or do they transcend physical boundaries?*
+
+---
+
+## Record of AI Use for MTHM503
+
+| Date | AI Tool | Purpose | Prompt | Link | Section |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+|    |    |    |    |    |

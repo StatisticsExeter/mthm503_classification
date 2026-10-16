@@ -1,0 +1,215 @@
+---
+title: "Predicting Passenger Injury in Single Car Road Collisions"
+subtitle: "An application of supervised learning"
+author: "Anonymous"
+format:
+  html:
+    embed-resources: true
+standalone: true
+---
+
+```{python}
+#| echo: false
+from pathlib import Path
+import pandas as pd
+
+
+def check_exists(path):
+    path = Path(path)
+
+    if not path.exists():
+        print(f"ERROR: Could not find resource: {path}")
+        print("Please check that:")
+        print("  - The file exists")
+        print("  - The path is correct")
+        print("  - Any previous pipeline stages have completed successfully")
+        print()
+        print(
+            "If you have left it too late before a deadline to ask for "
+            "help resolving this issue, please include the missing "
+            "artefact separately in your coursework submission."
+        )
+        return False
+
+    return True
+```
+
+
+## Overview (replace this section)
+
+Briefly describe the aim of this report.
+You should state:
+
+- what is being predicted (passenger injury)
+- what type of data is being used (road collision data)
+- what kind of models you are fitting (classification models)
+
+Example:
+
+"This report investigates whether it is possible to predict whether a passenger was injured in a road traffic collision using a small number of variables describing the time of the collision, the vehicle, and the driver."
+
+Do not describe code or implementation details here.
+
+## The data (edit and expand)
+
+Describe the dataset used in your analysis.
+
+You should mention:
+
+- the source of the data (STATS19 road collision data)
+- that the data were restricted to single‑vehicle collisions
+- that collisions involving pedestrians were excluded
+- that each row corresponds to a single collision
+
+List the variables used in the analysis:
+
+- `day_of_year`
+- `hour_of_day`
+- `speed_limit`
+- `engine_capacity_cc`
+- `vehicle_age`
+- `driver_age`
+- `passenger_injured` (outcome variable)
+
+Briefly explain any data cleaning:
+
+- removal of missing values
+- removal of "unknown" sentinel values (e.g. -1)
+
+You may include a small summary table of group means if helpful.  You may find some other exploratory data analysis informative as well (see later).
+
+## Class balance (important)
+
+Describe the distribution of the outcome variable.
+
+You should explicitly state:
+
+- which class is the majority
+- which class is the minority
+- whether the dataset is balanced or imbalanced
+
+Explain why this matters:
+
+- why accuracy can be misleading
+- why a trivial classifier might appear to perform well
+- why threshold‑free metrics are useful
+
+You may not need to "fix" imbalance unless you choose to, but you must acknowledge it.
+
+## Exploratory analysis (describe, do not dump plots)
+
+Briefly describe any exploratory analysis carried out.
+
+![Exploratory Data Analysis Scatterplot](../../artefacts/supervised/cw/scatterplot.jpg)
+
+
+If you include scatterplots:
+
+- explain what is being plotted
+- comment on whether the two classes appear separable
+
+You are not expected to show separation here; absence of structure is still a result.
+
+## Linear Discriminant Analysis (LDA)
+
+State that you fitted a Linear Discriminant Analysis classifier.
+You should comment on:
+
+- which variables appear to contribute most strongly
+- whether the direction of effects is plausible
+- whether separation appears weak or strong
+
+Avoid copying large blocks of model output.
+Focus on interpretation, not mechanics.
+
+## Quadratic Discriminant Analysis (QDA)
+
+State that you also fitted a Quadratic Discriminant Analysis classifier.
+Briefly compare QDA to LDA:
+
+- does it behave differently?
+- does it appear to fit the data better or worse?
+- are there signs of instability or overfitting?
+
+You do not need to prefer QDA over LDA but you do need to justify whatever you observe.
+
+## Model evaluation (ROC and AUC)
+
+Describe how the classifiers were evaluated.
+
+
+```{python}
+#| echo: false
+report = "../../artefacts/supervised/lda_report.csv"
+if(check_exists(report)):
+    print(pd.read_csv(report))
+
+```
+
+
+![ROC Curve Comparison](../../artefacts/supervised/cw/lda_roc.jpg)
+
+```{python}
+#| echo: false
+report = "../../artefacts/supervised/qda_report.csv"
+if(check_exists(report)):
+    print(pd.read_csv(report))
+
+```
+
+
+
+![ROC Curve Comparison](../../artefacts/supervised/cw/qda_roc.jpg)
+
+
+You should:
+
+- explain what an ROC curve represents (in brief)
+- report AUC values for your models
+- compare performance between models
+
+Comment on:
+
+- whether performance is meaningfully better than random
+- how class imbalance affects interpretation
+- whether one model clearly dominates
+
+Avoid overstating results; modest performance is expected.
+
+## Limitations and extensions (short but thoughtful)
+
+Briefly discuss limitations of this analysis.
+Possible points include:
+
+- limited number of features
+- strong class imbalance
+- simplifying assumptions of the models
+- lack of causal interpretation
+
+You may outline possible extensions:
+
+- alternative classifiers
+- feature engineering
+- rebalancing methods
+- different evaluation metrics
+
+
+## Conclusion (very short)
+
+Summarise, in 3–4 sentences:
+
+- what you attempted
+- what worked reasonably
+- what did not
+- what you would explore next
+
+Do not introduce new results here.
+
+Record of AI use (mandatory)
+Complete the table below accurately.
+
+## Record of AI use for MTHM503 supervised coursework
+
+| **Date** | **AI tool used** | **Purpose** | **Prompt** | **Section of work used for** |
+|:---|:---|:---|:---|:---|
+|    |    |    |    |    |

@@ -1,0 +1,204 @@
+---
+title: "Clustering local authorities by residential energy characteristics"
+subtitle: "An application of unsupervised learning"
+author: "Anonymous"
+format:
+  html:
+    embed-resources: true
+standalone: true
+---
+
+```{python}
+#| echo: false
+from pathlib import Path
+import pandas as pd
+
+
+def check_exists(path):
+    path = Path(path)
+
+    if not path.exists():
+        print(f"ERROR: Could not find resource: {path}")
+        print("Please check that:")
+        print("  - The file exists")
+        print("  - The path is correct")
+        print("  - Any previous pipeline stages have completed successfully")
+        print()
+        print(
+            "If you have left it too late before a deadline to ask for "
+            "help resolving this issue, please include the missing "
+            "artefact separately in your coursework submission."
+        )
+        return False
+
+    return True
+```
+
+
+## Overview (replace this section)
+
+Briefly describe the purpose of this report.
+You should state:
+
+- what is being clustered (local authorities)
+- what the variables represent (typical residential energy characteristics)
+- why clustering is an appropriate tool for this task
+
+Example:
+"This report uses unsupervised learning techniques to explore whether local authorities in England and Wales can be grouped according to the typical energy performance and running costs of residential dwellings."
+Do not describe code or implementation details here.
+
+##  The data
+
+Data source
+
+The data are derived from Energy Performance Certificates (EPCs) for domestic properties in England and Wales.
+EPC data are publicly available from:
+<https://epc.opendatacommunities.org/>
+Each EPC records information on energy use, carbon emissions, and estimated running costs for an individual dwelling.
+
+### Aggregation to local authorities
+
+Rather than clustering individual dwellings, the analysis aggregates EPC data to the local authority level.
+Each local authority is treated as a single observation, described by summary statistics representing a typical dwelling in that area.
+For each local authority, the median of selected variables is computed. Medians are used in preference to means to reduce the influence of outliers and skewed distributions.
+
+### Variables supplied for analysis
+
+The preprocessing pipeline provides the following five variables:
+
+- `median_co2_emissions_current`
+- `median_energy_consumption_current`
+- `median_heating_cost_current`
+- `median_hot_water_cost_current`
+- `median_lighting_cost_current`
+
+These correspond to current (observed) values, not hypothetical "potential" improvements.
+
+### Important:
+
+The Click script used to generate the analysis dataset intentionally restricts the available variables to this small set.   You can modify this script if you wish to work with the "per area" metrics which are extracted by the query. Feature selection is part of the analytical task.
+
+You should briefly explain what each variable measures and why it may be informative.
+
+## Interpretation of the variables (conceptual, not technical)
+
+You should reflect on what these variables capture.
+
+###In particular:
+
+- they describe absolute emissions and costs, not efficiency per unit area
+- larger dwellings may therefore appear "worse" even if they are relatively efficient
+- the clustering reflects typical residential impact, not optimal performance
+
+You may comment on alternative representations (e.g. per‑floor‑area metrics), and you may explore these by modifying the click script.
+
+##  Exploratory data analysis
+
+Before clustering, explore the relationships between the variables.
+
+### You should:
+
+- comment on differences in scale between variables
+- explain why scaling or standardisation is required
+- describe any strong correlations you observe
+
+You may include scatterplots or a scatter‑matrix to support your discussion such as
+
+![Energy usage and building impact metrics](../../artefacts/unsupervised/cw/scatterplot.jpg)
+
+but should not include plots without commentary.
+
+## Hierarchical clustering
+
+Hierarchical clustering allows us to explore similarity between local authorities without pre‑specifying the number of clusters.
+
+### You should:
+
+- state which distance metric and linkage method you use
+- briefly justify these choices
+- explain what the dendrogram represents
+
+### Dendrogram
+
+![Hierarchical clustering](../../artefacts/unsupervised/cw/dendrogram.jpg)
+
+You must justify where (and why) you choose to "cut" the dendrogram to form clusters. There is no single correct answer.
+
+## Visualising clusters using PCA
+
+To help interpret the hierarchical clustering, project the data onto the first two Principal Components.
+
+### You should explain:
+
+- what PCA does in general terms
+- why it is useful for visualising clustering results
+- whether the projected clusters appear well separated
+
+![PCA, first two dimensions with cluster membership](../../artefacts/unsupervised/cw/hcluster_scatter.jpg)
+
+### K‑Means clustering
+
+K‑Means clustering requires the number of clusters k to be chosen in advance.
+
+### You should:
+
+- explain how you selected k
+- comment on the stability or sensitivity of the solution
+- interpret the resulting cluster centroids
+
+### Cluster centroids
+
+These plots show the average value of each variable within each cluster (in the original units).
+![Summary of cluster centers](../../artefacts/unsupervised/cw/kmeans_1.jpg)
+
+Explain what distinguishes the clusters in substantive terms (e.g. higher emissions, higher running costs).
+
+### PCA visualisation
+
+As with hierarchical clustering, use PCA to visualise the K‑Means solution.
+![First two dimensions of data from PCA with kmeans cluster memberships](../../artefacts/unsupervised/cw/kmeans_scatter.jpg)
+
+Compare the apparent separation with that observed for hierarchical clustering.
+
+## Comparison and interpretation
+Briefly compare the results from hierarchical clustering and K‑Means.
+
+### You may consider:
+
+- whether the methods produce similar groupings
+- which clusters are most interpretable
+- whether some local authorities consistently group together
+
+Remember: in unsupervised learning, interpretability and justification matter more than finding a "correct" answer.
+
+## Limitations and extensions
+
+Discuss limitations of this analysis. Possible points include:
+
+- aggregation masking within‑authority variation
+- sensitivity to variable choice and scaling
+- difficulty in assigning real‑world meaning to clusters
+
+You may suggest and implement extensions, such as:
+
+- using per‑floor‑area efficiency metrics
+- including additional EPC variables
+- trying alternative clustering methods (e.g. DBSCAN)
+
+You do not need to implement **all** these to receive full credit.  However, we do wish to see you can extend the pipeline you were given
+
+## Conclusion (short)
+
+
+### Summarise:
+
+- what the clustering reveals
+- what remains ambiguous
+- what you would explore next with additional data or methods
+
+## Record of AI Use for MTHM503
+
+| Date | AI Tool | Purpose | Prompt | Link | Section |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+|      |      |      |      |      |      |

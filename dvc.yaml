@@ -1,0 +1,197 @@
+vars:
+      - params.yaml
+stages:
+  unsupervised_load:
+    cmd: >
+      python scripts/unsupervised/01_load_data_${mode}.py
+      --sql-file sql/unsupervised_${mode}.sql
+      --duck-file data/coursework_2027.duckdb
+      --output-csv artefacts/unsupervised/${mode}/data.csv
+    deps:
+      - sql/unsupervised_${mode}.sql
+      - scripts/unsupervised/01_load_data_${mode}.py
+    outs:
+      - artefacts/unsupervised/${mode}/data.csv
+
+  unsupervised_eda:
+    cmd: >
+      python scripts/unsupervised/02_eda.py
+      --input-csv artefacts/unsupervised/${mode}/data.csv
+      --out-path artefacts/unsupervised/${mode}/scatterplot.jpg
+      --title "MY SCATTERPLOT"
+    deps:
+      - artefacts/unsupervised/${mode}/data.csv
+      - scripts/unsupervised/02_eda.py
+      - src/unsupervised/unsupervised_core.py
+    outs:
+      - artefacts/unsupervised/${mode}/scatterplot.jpg
+
+  unsupervised_train:
+    cmd: >
+      python scripts/unsupervised/03_cluster.py
+      --input-csv artefacts/unsupervised/${mode}/data.csv
+      --out-dir artefacts/unsupervised/${mode}
+      --height 10
+      --k 4
+    deps:
+      - artefacts/unsupervised/${mode}/data.csv
+      - scripts/unsupervised/03_cluster.py
+      - src/unsupervised/unsupervised_core.py
+    outs:
+      - artefacts/unsupervised/${mode}/dendrogram.jpg
+      - artefacts/unsupervised/${mode}/hcluster_scatter.jpg
+      - artefacts/unsupervised/${mode}/kmeans_1.jpg
+      - artefacts/unsupervised/${mode}/kmeans_2.jpg
+      - artefacts/unsupervised/${mode}/kmeans_scatter.jpg
+  unsupervised_report:
+    cmd: >
+      quarto render reports/templates/${mode}_unsupervised.qmd
+      --output-dir ..
+    deps:
+      - reports/templates/${mode}_unsupervised.qmd
+      - artefacts/unsupervised/${mode}/scatterplot.jpg
+      - artefacts/unsupervised/${mode}/dendrogram.jpg
+      - artefacts/unsupervised/${mode}/hcluster_scatter.jpg
+      - artefacts/unsupervised/${mode}/kmeans_1.jpg
+      - artefacts/unsupervised/${mode}/kmeans_2.jpg
+      - artefacts/unsupervised/${mode}/kmeans_scatter.jpg
+    outs:
+      - reports/${mode}_unsupervised.html
+
+  supervised_load:
+    cmd: >
+      python scripts/supervised/01_load_data_${mode}.py
+      --sql-file sql/supervised_${mode}.sql
+      --duck-file data/coursework_2027.duckdb
+      --output-csv artefacts/supervised/${mode}/data.csv
+    deps:
+      - sql/supervised_${mode}.sql
+      - scripts/supervised/01_load_data_${mode}.py
+    outs:
+      - artefacts/supervised/${mode}/data.csv
+
+  supervised_split:
+    cmd: >
+      python scripts/supervised/02_split.py
+      --input-csv artefacts/supervised/${mode}/data.csv
+      --target-var ${active.supervised_target_variable}
+      --x-train-out artefacts/supervised/${mode}/x_train.csv
+      --y-train-out artefacts/supervised/${mode}/y_train.csv
+      --x-test-out artefacts/supervised/${mode}/x_test.csv
+      --y-test-out artefacts/supervised/${mode}/y_test.csv
+    deps:
+      - artefacts/supervised/${mode}/data.csv
+      - scripts/supervised/02_split.py
+      - src/supervised/supervised_core.py
+    outs:
+      - artefacts/supervised/${mode}/x_train.csv
+      - artefacts/supervised/${mode}/y_train.csv
+      - artefacts/supervised/${mode}/x_test.csv
+      - artefacts/supervised/${mode}/y_test.csv
+
+  supervised_train_lda:
+    cmd: >
+      python scripts/supervised/03_classify.py train
+      --x-train artefacts/supervised/${mode}/x_train.csv
+      --y-train artefacts/supervised/${mode}/y_train.csv
+      --model-type lda
+      --model-out artefacts/supervised/${mode}/lda_model.joblib
+    deps:
+      - artefacts/supervised/${mode}/x_train.csv
+      - artefacts/supervised/${mode}/y_train.csv
+      - scripts/supervised/03_classify.py
+      - src/supervised/supervised_core.py
+    outs:
+      - artefacts/supervised/${mode}/lda_model.joblib
+
+  supervised_predict_lda:
+    cmd: >
+      python scripts/supervised/03_classify.py predict
+      --x-test artefacts/supervised/${mode}/x_test.csv
+      --model-in artefacts/supervised/${mode}/lda_model.joblib
+      --pred-out artefacts/supervised/${mode}/lda_y_pred.csv
+      --prob-out artefacts/supervised/${mode}/lda_y_pred_prob.csv
+    deps:
+      - artefacts/supervised/${mode}/x_test.csv
+      - artefacts/supervised/${mode}/lda_model.joblib
+      - scripts/supervised/03_classify.py
+      - src/supervised/supervised_core.py
+    outs:
+      - artefacts/supervised/${mode}/lda_y_pred.csv
+      - artefacts/supervised/${mode}/lda_y_pred_prob.csv
+
+  supervised_train_qda:
+    cmd: >
+      python scripts/supervised/03_classify.py train
+      --x-train artefacts/supervised/${mode}/x_train.csv
+      --y-train artefacts/supervised/${mode}/y_train.csv
+      --model-type qda
+      --model-out artefacts/supervised/${mode}/qda_model.joblib
+    deps:
+      - artefacts/supervised/${mode}/x_train.csv
+      - artefacts/supervised/${mode}/y_train.csv
+      - scripts/supervised/03_classify.py
+      - src/supervised/supervised_core.py
+    outs:
+      - artefacts/supervised/${mode}/qda_model.joblib
+
+  supervised_predict_qda:
+    cmd: >
+      python scripts/supervised/03_classify.py predict
+      --x-test artefacts/supervised/${mode}/x_test.csv
+      --model-in artefacts/supervised/${mode}/qda_model.joblib
+      --pred-out artefacts/supervised/${mode}/qda_y_pred.csv
+      --prob-out artefacts/supervised/${mode}/qda_y_pred_prob.csv
+    deps:
+      - artefacts/supervised/${mode}/x_test.csv
+      - artefacts/supervised/${mode}/qda_model.joblib
+      - scripts/supervised/03_classify.py
+      - src/supervised/supervised_core.py
+    outs:
+      - artefacts/supervised/${mode}/qda_y_pred.csv
+      - artefacts/supervised/${mode}/qda_y_pred_prob.csv
+
+  supervised_evaluate_lda:
+    cmd: >
+      python scripts/supervised/04_evaluate.py 
+      --y-test-csv artefacts/supervised/${mode}/y_test.csv 
+      --classifier-pred-csv artefacts/supervised/${mode}/lda_y_pred.csv 
+      --classifier-prob-csv artefacts/supervised/${mode}/lda_y_pred_prob.csv 
+      --classifier-report-out artefacts/supervised/${mode}/lda_report.csv 
+      --roc-plot-out artefacts/supervised/${mode}/lda_roc.jpg
+    deps:
+      - artefacts/supervised/${mode}/y_test.csv 
+      - artefacts/supervised/${mode}/lda_y_pred.csv 
+      - artefacts/supervised/${mode}/lda_y_pred_prob.csv 
+      - scripts/supervised/04_evaluate.py
+      - src/supervised/supervised_core.py
+    outs:
+      - artefacts/supervised/${mode}/lda_report.csv
+      - artefacts/supervised/${mode}/lda_roc.jpg
+  supervised_evaluate_qda:
+    cmd: >
+      python scripts/supervised/04_evaluate.py 
+      --y-test-csv artefacts/supervised/${mode}/y_test.csv 
+      --classifier-pred-csv artefacts/supervised/${mode}/qda_y_pred.csv 
+      --classifier-prob-csv artefacts/supervised/${mode}/qda_y_pred_prob.csv 
+      --classifier-report-out artefacts/supervised/${mode}/qda_report.csv 
+      --roc-plot-out artefacts/supervised/${mode}/qda_roc.jpg
+    deps:
+      - artefacts/supervised/${mode}/y_test.csv 
+      - artefacts/supervised/${mode}/qda_y_pred.csv 
+      - artefacts/supervised/${mode}/qda_y_pred_prob.csv 
+      - scripts/supervised/04_evaluate.py
+      - src/supervised/supervised_core.py
+    outs:
+      - artefacts/supervised/${mode}/qda_report.csv
+      - artefacts/supervised/${mode}/qda_roc.jpg
+  supervised_report:
+    cmd: >
+      quarto render reports/templates/${mode}_supervised.qmd
+      --output-dir ..
+    deps:
+      - reports/templates/${mode}_supervised.qmd
+      - artefacts/supervised/${mode}/lda_report.csv
+      - artefacts/supervised/${mode}/qda_report.csv
+    outs:
+      - reports/${mode}_supervised.html      

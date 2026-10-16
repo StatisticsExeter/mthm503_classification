@@ -1,0 +1,109 @@
+---
+title: "Building a classifier to predicting house age"
+subtitle: "An application of supervised learning"
+author: "Anonymous"
+format:
+  html:
+    embed-resources: true
+standalone: true
+---
+
+```{python}
+#| echo: false
+from pathlib import Path
+import pandas as pd
+
+
+def check_exists(path):
+    path = Path(path)
+
+    if not path.exists():
+        print(f"ERROR: Could not find resource: {path}")
+        print("Please check that:")
+        print("  - The file exists")
+        print("  - The path is correct")
+        print("  - Any previous pipeline stages have completed successfully")
+        print()
+        print(
+            "If you have left it too late before a deadline to ask for "
+            "help resolving this issue, please include the missing "
+            "artefact separately in your coursework submission."
+        )
+        return False
+
+    return True
+```
+
+## Your task
+
+This material is provided as context to the problem. You should rewrite it as you see fit.
+
+## The Problem
+
+Data on [Energy Certificates](https://epc.opendatacommunities.org/) were downloaded in March 2025. In this task, you are required to determine whether it is possible to determine the age of a house based on several recorded energy metrics.
+
+## The Data
+
+A very simple preview of the group summary statistics:
+
+```{python}
+#| echo: false
+report = "../../artefacts/supervised/lab/data.csv"
+if(check_exists(report)):
+    print(pd.read_csv(report).describe())
+
+```
+
+It is always useful to view a scatterplot of the data, marking the two known groups:
+
+![Exploratory Data Analysis Scatterplot](../../artefacts/supervised/lab/scatterplot.jpg)
+
+## Fitting LDA and QDA classifiers
+
+The simplest classifiers we could apply are Linear and Quadratic Discriminant analysis.
+
+### Results from fitting a Linear Discriminant Analysis
+
+
+
+### Results from fitting a Quadratic Discriminant Analysis
+
+
+You should comment on these results. You may wish to add an interpretation of the coefficients of these classifiers.
+
+## ROC curve (and AUC) for simple classifiers
+
+We can examine the AUC for these classifiers to compare their performance across various thresholds.
+
+```{python}
+#| echo: false
+report = "../../artefacts/supervised/lda_report.csv"
+if(check_exists(report)):
+    print(pd.read_csv(report))
+
+```
+
+![ROC Curve Comparison](../../artefacts/supervised/lab/lda_roc.jpg)
+
+
+```{python}
+#| echo: false
+report = "../../artefacts/supervised/qda_report.csv"
+if(check_exists(report)):
+    print(pd.read_csv(report))
+
+```
+
+![ROC Curve Comparison](../../artefacts/supervised/lab/qda_roc.jpg)
+
+You should comment on the performance of the classifier.
+
+## Additional credit
+
+For additional credit you should consider extending the pipeline and trying out other classifiers.
+
+## Record of AI use for MTHM503 supervised coursework
+
+| **Date** | **AI tool used** | **Purpose** | **Prompt** | **Section of work used for** |
+|:---|:---|:---|:---|:---|
+|    |    |    |    |    |

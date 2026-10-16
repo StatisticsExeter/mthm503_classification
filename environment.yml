@@ -1,0 +1,21 @@
+name: pycw
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pytest
+  - python=3.12
+  - flake8
+  - scikit-learn
+  - dvc
+  - scipy
+  - matplotlib
+  - jupyter
+  - pandas
+  - pandoc
+  - duckdb
+  - duckdb-cli
+  - pip
+  - pip:
+    - psycopg2
+
