@@ -1,120 +1,283 @@
-# mthm503
+# MTHM503: Classification Pipelines
 
-![CI](https://github.com/<YOUR USER NAME>/<YOUR REPOSITORY NAME>/actions/workflows/main.yml/badge.svg)
+https://github.com/StatisticsExeter/mthm503_classification/actions/workflows/main.yml/badge.svg
 
-This repository contains the materials for the course **MTHM503: Applications of Data Science and Statistics**.
+This repository contains the coursework and laboratory materials for **MTHM503: Applications of Data Science and Statistics**.
 
-You will use *your own copy* of this repository (created via GitHub Classroom or by forking) for all assessed and non-assessed work on this module.
+The module focuses on building reproducible machine learning workflows using:
 
-> **Note**: In a professional setting, a DevOps engineer (or team of engineers) would be responsible for setting up infrastructure like this.
-> In this course, you only need to operate *within* the provided infrastructure.
+- Python
+- Git and GitHub
+- Conda
+- DVC
+- Unit testing with `pytest`
+- Automated checking with GitHub Actions
+- Quarto reports
 
----
-
-## How you should work in this repository
-
-- You should **always do your development work on the `main` branch**
-- Automated tests and checks run on `main`
-- For **formative feedback**, open a pull request from:
-  - **compare**: `main`
-  - **base**: `feedback`
-
-Do **not** merge feedback pull requests — tutors will comment on them and then close them.
-
-(Full details are given below.)
+You will work in your own copy of this repository throughout the module.
 
 ---
 
-## Setting up for the first time
+# Getting Started
 
-The recommended development environment for this module is **Visual Studio Code (VS Code)**. More details:  [VS_CODE.md](VS_CODE.md)
+The recommended development environment is **Visual Studio Code**.
 
-I have tested the setup on University Virtual Machines, University laptops and lab machines, and personal Linux machines. It *does* work on Windows, but you will need to follow the instructions carefully.
+> Run commands from a terminal inside the repository directory.
 
-The **single most important instruction** is:
+## Create the environment
 
-> **Run commands from the command line (Anaconda Prompt / terminal) inside your repository directory.**
+From the repository root:
 
-Setup steps:
+```bash
+conda env create -f environment.yml
+```
 
-- Make sure you have a GitHub account and that it is registered as a *student account* with GitHub. Further instructions are available in ELE.
-- Open VS Code and clone your repository, or use **File → Open Folder** if you have already cloned it.
-- Open **Anaconda Prompt** (Windows) or a terminal (macOS/Linux) and navigate to the repository directory you just downloaded.
-- From that directory, run:
-  ```sh
-  conda env create -f environment.yml
-  ```
-- Activate the environment:
-  ```sh
-  activate python-exercises
-  ```
-- In VS Code, select this environment as your Python interpreter when prompted.
+Activate the environment:
 
-⚠️ You need to complete this setup in **Week 1**. Many things will not run correctly until it is done, and you will not be able to submit coursework otherwise.
+```bash
+conda activate pycw
+```
+
+## Verify your setup
+
+Run:
+
+```bash
+./run check
+```
+
+You should see a series of green ticks confirming:
+
+- Correct conda environment
+- Correct Python version
+- `pytest` installed
+- Quarto available
+
+If any checks fail, resolve those issues before continuing.
 
 ---
 
-## Developing reproducible pipelines
+# Working on the Coursework
 
-The core working method in this module is:
+There are two classification pipelines:
 
-> Write functions that pass unit tests, and integrate them into reproducible data pipelines.
+- Supervised Classification
+- Unsupervised Classification
 
-Key points:
+Each pipeline is managed using DVC.
 
-1. You can work **interactively in Python** using VS Code (Python Interactive Window, terminal REPL, or notebooks).
-2. You can also run Python scripts directly from the command line.
-3. Use interactive experimentation to develop ideas, then convert them into functions and scripts.
-4. Reproducible pipelines are managed using **DVC**. You will typically reproduce pipeline stages using:
-   ```sh
-   dvc repro
+## Running pipeline stages
+
+To run a complete supervised workflow:
+
+```bash
+dvc repro supervised_report
+```
+
+To run a complete unsupervised workflow:
+
+```bash
+dvc repro unsupervised_report
+```
+
+You can also run intermediate stages if you wish:
+
+```bash
+dvc repro supervised_model
+```
+
+```bash
+dvc repro unsupervised_cluster
+```
+
+DVC will automatically run any prerequisite stages that are required.
+
+---
+
+# Laboratory Mode and Coursework Mode
+
+The repository supports two modes:
+
+```yaml
+mode: labs
+```
+
+and
+
+```yaml
+mode: cw
+```
+
+During laboratory sessions you should normally use:
+
+```yaml
+mode: labs
+```
+
+When you begin the coursework, switch to:
+
+```yaml
+mode: cw
+```
+
+by editing `params.yaml`.
+
+You will also need to select the appropriate coursework configuration in the `active:` section.
+
+For example:
+
+```yaml
+active:
+  supervised_target_variable: "built_age"
+```
+
+Use the configuration specified in the coursework brief.
+
+---
+
+# Running Checks
+
+Before committing work, run the appropriate checks locally.
+
+## Supervised Classification
+
+```bash
+./run super
+```
+
+## Unsupervised Classification
+
+```bash
+./run unsuper
+```
+
+## All Checks
+
+```bash
+./run all
+```
+
+These commands will:
+
+1. Check Python syntax.
+2. Check for major coding errors.
+3. Run unit tests.
+4. Run linting checks.
+
+## Verbose Output
+
+For more detailed test output:
+
+## Verbose Output
+
+For more detailed test output:
+
+```bash
+./run super verbose
+```
+
+```bash
+./run unsuper verbose
+```
+
+```bash
+./run all verbose
+```
+
+
+
+# GitHub Actions
+
+Whenever you push changes:
+
+```bash
+git push
+```
+
+GitHub Actions will automatically run the same checks used by the local `run` script.
+
+A successful GitHub Actions run indicates that:
+
+- Your code runs on a clean machine.
+- Unit tests pass.
+- Linting checks pass.
+
+You should ensure that GitHub Actions is passing before submission.
+
+
+
+# Formative Feedback
+
+Formative feedback will be provided through Moodle.
+
+When requesting feedback, provide:
+
+- Repository URL
+- Commit hash
+
+For example:
+
+```text
+Repository:
+https://github.com/username/mthm503-classification
+
+Commit:
+a43f0b8
+```
+
+This allows tutors to review the exact version of the work you wish to discuss.
+
+---
+
+# Typical Workflow
+
+```text
+1. Write code
+
+2. Run checks
+   ./run super
+   ./run unsuper
+
+3. Run pipeline
+   dvc repro supervised_report
+   dvc repro unsupervised_report
+
+4. Commit changes
+   git add .
+   git commit -m "Implement classifier"
+
+5. Push to GitHub
+   git push
+
+6. Confirm GitHub Actions passes
+```
+
+---
+
+# Getting Help
+
+If something is not working:
+
+1. Run:
+
+   ```bash
+   ./run check
    ```
 
-All intermediate data products are tracked and managed by DVC, allowing pipelines to be re-run reliably and inspected at any stage.
+2. Read the error message carefully.
 
-As the course progresses, you are encouraged — especially for higher marks — to write **your own tests** and extend the pipelines.
+3. Consult the module discussion forum.
+
+4. Bring specific error messages to labs or office hours.
+
+When asking for help, include the complete error message whenever possible. This makes problems much easier to diagnose.
 
 ---
 
-## Formative feedback (pull requests)
+# Academic Integrity
 
-Formative feedback is given via **pull requests against the `feedback` branch**.
+All submitted work must be your own.
 
-### How to request feedback
+You are encouraged to discuss ideas with other students, but the code, analysis and report that you submit must represent your own work.
 
-1. Do all your work on `main`
-2. When you want feedback:
-   - Open a pull request
-   - **Base branch**: `feedback`
-   - **Compare branch**: `main`
-3. Select the appropriate pull request template (classification, regression, reporting, etc.)
-
-Tutors will leave comments on the pull request and then **close it**.
-
-> **Do not merge feedback pull requests.** They exist only to support written feedback and discussion.
-
-```
-        +----------------------------+
-        | 1. Get your repository    |
-        |    (GitHub Classroom)     |
-        +----------------------------+
-                   |
-                   v
-        +----------------------------+
-        | 2. Do the work on `main`  |
-        +----------------------------+
-                   |
-                   v
-        +----------------------------+
-        | 3. Open pull request      |
-        |    main → feedback        |
-        |    Select correct         |
-        |    PR template            |
-        +----------------------------+
-                   |
-                   v
-        +----------------------------+
-        | 4. Tutors review          |
-        |    and comment            |
-        +----------------------------+
-```
+Where external resources have been used, they should be acknowledged appropriately.
