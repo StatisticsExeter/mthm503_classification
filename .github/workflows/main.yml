@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main, python_private]
+
+  pull_request:
+    branches: [main, python_private]
+
+jobs:
+  test:
+    if: ${{ (github.repository == 'phewson/mthm503' && github.ref == 'refs/heads/python_private') || (github.repository != 'phewson/mthm503' && github.ref == 'refs/heads/main') }}
+
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniconda-version: latest
+          mamba-version: "*"
+          use-mamba: true
+          environment-file: environment.yml
+          activate-environment: pycw
+
+      - name: Supervised
+        continue-on-error: true
+        id: super
+        run: |
+          set -o pipefail
+          conda run -n pycw ./run super \
+            | tee super_output.txt
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+      - name: Unsupervised
+        continue-on-error: true
+        id: unsuper
+        run: |
+          set -o pipefail
+          conda run -n pycw ./run unsuper \
+            | tee unsuper_output.txt
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+      - name: Generate Progress Dashboard
+        if: always()
+        run: |
+          status() {
+            code="$1"
+
+            if [ "$code" = "0" ]; then
+              echo "✅ Complete"
+            elif [ "$code" = "" ]; then
+              echo "⚪ Not attempted"
+            else
+              echo "🟠 Needs attention"
+            fi
+          }
+
+          echo "## Coursework Progress" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Supervised Classification | $(status "${{ steps.super.outputs.exit_code }}") |" >> $GITHUB_STEP_SUMMARY
+          echo "| Unsupervised Classification | $(status "${{ steps.unsuper.outputs.exit_code }}") |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Generate PDF Report
+        if: always()
+        run: |
+          pip install pymupdf
+
+          python .github_cw_report.py \
+            "${{ steps.super.outputs.exit_code }}" \
+            "${{ steps.unsuper.outputs.exit_code }}"
+
+      - name: Upload Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coursework-report
+          path: |
+            ci_report.pdf
+            super_output.txt
+            unsuper_output.txt
+
+      - name: Final Status Check
+        if: always()
+        run: |
+          if [[ \
+              "${{ steps.super.outputs.exit_code }}" != "0" || \
+              "${{ steps.unsuper.outputs.exit_code }}" != "0"
+          ]]
+          then
+              echo "One or more checks require attention."
+              exit 1
+          fi
