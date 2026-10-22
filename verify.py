@@ -6,6 +6,8 @@ import shutil
 import subprocess
 from datetime import datetime
 
+sys.stdout.reconfigure(encoding="utf-8")
+
 try:
     import pytest
     pytest_version = pytest.__version__
