@@ -1,0 +1,75 @@
+#!/bin/bash
+
+CONDA_CANDIDATES=("/c/Users/$USERNAME/anaconda3"
+                    "/c/Users/$USERNAME/Anaconda"
+                    "/c/Users/$USERNAME/miniconda")
+
+QUARTO_CANDIDATES=("/c/Program Files/Quarto/bin"
+"/c/Program Files/RStudio/resources/app/bin/quarto/bin")
+
+
+setup_conda() {
+
+    if command -v conda >/dev/null 2>&1; then
+        echo "✓ Conda already available"
+        return
+    fi
+
+    for conda_root in "${CONDA_CANDIDATES[@]}"
+    do
+        if [ -f "$conda_root/etc/profile.d/conda.sh" ]; then
+            . "$conda_root/etc/profile.d/conda.sh"
+
+            if command -v conda >/dev/null 2>&1; then
+                echo "✓ Found Conda at $conda_root"
+                return
+            fi
+        fi
+    done
+
+    echo "✗ Unable to locate Conda"
+}
+
+
+setup_quarto() {
+
+    if command -v quarto >/dev/null 2>&1; then
+        echo "✓ Quarto already available"
+        return
+    fi
+
+    for quarto_root in "${QUARTO_CANDIDATES[@]}"
+    do
+        if [ -x "$quarto_root/quarto.exe" ]; then
+            export PATH="$PATH:$quarto_root"
+            echo "✓ Found Quarto at $quarto_root"
+            return
+        fi
+    done
+
+    echo "✗ Unable to locate Quarto"
+}
+
+
+
+echo "Initialising course environment..."
+echo
+
+setup_conda
+setup_quarto
+
+if command -v conda >/dev/null 2>&1; then
+    echo "✓ Found Conda version $(conda --version)"
+else
+    echo "✗ Conda initialisation failed"
+fi
+
+echo
+
+if command -v quarto >/dev/null 2>&1; then
+    echo "✓ Found Quarto version: $(quarto --version)"
+fi
+
+echo
+echo "Next step:"
+echo "    conda activate my-environment"
