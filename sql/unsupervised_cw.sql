@@ -1,2 +1,2 @@
 SELECT *
-FROM energy.la_summaries;
+FROM deprivation_indicators;

@@ -70,9 +70,21 @@ stages:
     outs:
       - artefacts/supervised/${mode}/data.csv
 
+  supervised_eda:
+    cmd: >-
+      python scripts/supervised/02_eda.py
+      --input-csv artefacts/supervised/${mode}/data.csv
+      --target-var ${active.supervised_target_variable}
+      --plot-out "artefacts/supervised/${mode}/eda.jpg"
+      --title "TO BE ADDED"
+    deps:
+      - artefacts/supervised/${mode}/data.csv
+    outs:
+      - artefacts/supervised/${mode}/eda.jpg
+
   supervised_split:
     cmd: >
-      python scripts/supervised/02_split.py
+      python scripts/supervised/03_split.py
       --input-csv artefacts/supervised/${mode}/data.csv
       --target-var ${active.supervised_target_variable}
       --x-train-out artefacts/supervised/${mode}/x_train.csv
@@ -81,7 +93,7 @@ stages:
       --y-test-out artefacts/supervised/${mode}/y_test.csv
     deps:
       - artefacts/supervised/${mode}/data.csv
-      - scripts/supervised/02_split.py
+      - scripts/supervised/03_split.py
       - src/supervised/supervised_core.py
     outs:
       - artefacts/supervised/${mode}/x_train.csv
@@ -89,109 +101,114 @@ stages:
       - artefacts/supervised/${mode}/x_test.csv
       - artefacts/supervised/${mode}/y_test.csv
 
-  supervised_train_lda:
+  supervised_train_logistic:
     cmd: >
-      python scripts/supervised/03_classify.py train
+      python scripts/supervised/04_classify.py train
       --x-train artefacts/supervised/${mode}/x_train.csv
       --y-train artefacts/supervised/${mode}/y_train.csv
-      --model-type lda
-      --model-out artefacts/supervised/${mode}/lda_model.joblib
+      --model-type logistic
+      --model-out artefacts/supervised/${mode}/logistic_model.joblib
     deps:
       - artefacts/supervised/${mode}/x_train.csv
       - artefacts/supervised/${mode}/y_train.csv
-      - scripts/supervised/03_classify.py
+      - scripts/supervised/04_classify.py
       - src/supervised/supervised_core.py
     outs:
-      - artefacts/supervised/${mode}/lda_model.joblib
+      - artefacts/supervised/${mode}/logistic_model.joblib
 
-  supervised_predict_lda:
+  supervised_predict_logistic:
     cmd: >
-      python scripts/supervised/03_classify.py predict
+      python scripts/supervised/04_classify.py predict
       --x-test artefacts/supervised/${mode}/x_test.csv
-      --model-in artefacts/supervised/${mode}/lda_model.joblib
-      --pred-out artefacts/supervised/${mode}/lda_y_pred.csv
-      --prob-out artefacts/supervised/${mode}/lda_y_pred_prob.csv
+      --model-in artefacts/supervised/${mode}/logistic_model.joblib
+      --pred-out artefacts/supervised/${mode}/logistic_y_pred.csv
+      --prob-out artefacts/supervised/${mode}/logistic_y_pred_prob.csv
     deps:
       - artefacts/supervised/${mode}/x_test.csv
-      - artefacts/supervised/${mode}/lda_model.joblib
-      - scripts/supervised/03_classify.py
+      - artefacts/supervised/${mode}/logistic_model.joblib
+      - scripts/supervised/04_classify.py
       - src/supervised/supervised_core.py
     outs:
-      - artefacts/supervised/${mode}/lda_y_pred.csv
-      - artefacts/supervised/${mode}/lda_y_pred_prob.csv
+      - artefacts/supervised/${mode}/logistic_y_pred.csv
+      - artefacts/supervised/${mode}/logistic_y_pred_prob.csv
 
-  supervised_train_qda:
+  supervised_train_tree:
     cmd: >
-      python scripts/supervised/03_classify.py train
+      python scripts/supervised/04_classify.py train
       --x-train artefacts/supervised/${mode}/x_train.csv
       --y-train artefacts/supervised/${mode}/y_train.csv
-      --model-type qda
-      --model-out artefacts/supervised/${mode}/qda_model.joblib
+      --model-type tree
+      --model-out artefacts/supervised/${mode}/tree_model.joblib
     deps:
       - artefacts/supervised/${mode}/x_train.csv
       - artefacts/supervised/${mode}/y_train.csv
-      - scripts/supervised/03_classify.py
+      - scripts/supervised/04_classify.py
       - src/supervised/supervised_core.py
     outs:
-      - artefacts/supervised/${mode}/qda_model.joblib
+      - artefacts/supervised/${mode}/tree_model.joblib
 
-  supervised_predict_qda:
+  supervised_predict_tree:
     cmd: >
-      python scripts/supervised/03_classify.py predict
+      python scripts/supervised/04_classify.py predict
       --x-test artefacts/supervised/${mode}/x_test.csv
-      --model-in artefacts/supervised/${mode}/qda_model.joblib
-      --pred-out artefacts/supervised/${mode}/qda_y_pred.csv
-      --prob-out artefacts/supervised/${mode}/qda_y_pred_prob.csv
+      --model-in artefacts/supervised/${mode}/tree_model.joblib
+      --pred-out artefacts/supervised/${mode}/tree_y_pred.csv
+      --prob-out artefacts/supervised/${mode}/tree_y_pred_prob.csv
     deps:
       - artefacts/supervised/${mode}/x_test.csv
-      - artefacts/supervised/${mode}/qda_model.joblib
-      - scripts/supervised/03_classify.py
+      - artefacts/supervised/${mode}/tree_model.joblib
+      - scripts/supervised/04_classify.py
       - src/supervised/supervised_core.py
     outs:
-      - artefacts/supervised/${mode}/qda_y_pred.csv
-      - artefacts/supervised/${mode}/qda_y_pred_prob.csv
+      - artefacts/supervised/${mode}/tree_y_pred.csv
+      - artefacts/supervised/${mode}/tree_y_pred_prob.csv
 
-  supervised_evaluate_lda:
+  supervised_evaluate_logistic:
     cmd: >
-      python scripts/supervised/04_evaluate.py 
-      --y-test-csv artefacts/supervised/${mode}/y_test.csv 
-      --classifier-pred-csv artefacts/supervised/${mode}/lda_y_pred.csv 
-      --classifier-prob-csv artefacts/supervised/${mode}/lda_y_pred_prob.csv 
-      --classifier-report-out artefacts/supervised/${mode}/lda_report.csv 
-      --roc-plot-out artefacts/supervised/${mode}/lda_roc.jpg
+      python scripts/supervised/05_evaluate.py
+      --y-test-csv artefacts/supervised/${mode}/y_test.csv
+      --classifier-pred-csv artefacts/supervised/${mode}/logistic_y_pred.csv
+      --classifier-prob-csv artefacts/supervised/${mode}/logistic_y_pred_prob.csv
+      --classifier-metrics-out artefacts/supervised/${mode}/logistic_metrics.csv
+      --roc-plot-out artefacts/supervised/${mode}/logistic_roc.jpg
     deps:
-      - artefacts/supervised/${mode}/y_test.csv 
-      - artefacts/supervised/${mode}/lda_y_pred.csv 
-      - artefacts/supervised/${mode}/lda_y_pred_prob.csv 
-      - scripts/supervised/04_evaluate.py
+      - artefacts/supervised/${mode}/y_test.csv
+      - artefacts/supervised/${mode}/logistic_y_pred.csv
+      - artefacts/supervised/${mode}/logistic_y_pred_prob.csv
+      - scripts/supervised/05_evaluate.py
       - src/supervised/supervised_core.py
     outs:
-      - artefacts/supervised/${mode}/lda_report.csv
-      - artefacts/supervised/${mode}/lda_roc.jpg
-  supervised_evaluate_qda:
+      - artefacts/supervised/${mode}/logistic_metrics.csv
+      - artefacts/supervised/${mode}/logistic_roc.jpg
+
+  supervised_evaluate_tree:
     cmd: >
-      python scripts/supervised/04_evaluate.py 
-      --y-test-csv artefacts/supervised/${mode}/y_test.csv 
-      --classifier-pred-csv artefacts/supervised/${mode}/qda_y_pred.csv 
-      --classifier-prob-csv artefacts/supervised/${mode}/qda_y_pred_prob.csv 
-      --classifier-report-out artefacts/supervised/${mode}/qda_report.csv 
-      --roc-plot-out artefacts/supervised/${mode}/qda_roc.jpg
+      python scripts/supervised/05_evaluate.py
+      --y-test-csv artefacts/supervised/${mode}/y_test.csv
+      --classifier-pred-csv artefacts/supervised/${mode}/tree_y_pred.csv
+      --classifier-prob-csv artefacts/supervised/${mode}/tree_y_pred_prob.csv
+      --classifier-metrics-out artefacts/supervised/${mode}/tree_metrics.csv
+      --roc-plot-out artefacts/supervised/${mode}/tree_roc.jpg
     deps:
-      - artefacts/supervised/${mode}/y_test.csv 
-      - artefacts/supervised/${mode}/qda_y_pred.csv 
-      - artefacts/supervised/${mode}/qda_y_pred_prob.csv 
-      - scripts/supervised/04_evaluate.py
+      - artefacts/supervised/${mode}/y_test.csv
+      - artefacts/supervised/${mode}/tree_y_pred.csv
+      - artefacts/supervised/${mode}/tree_y_pred_prob.csv
+      - scripts/supervised/05_evaluate.py
       - src/supervised/supervised_core.py
     outs:
-      - artefacts/supervised/${mode}/qda_report.csv
-      - artefacts/supervised/${mode}/qda_roc.jpg
+      - artefacts/supervised/${mode}/tree_metrics.csv
+      - artefacts/supervised/${mode}/tree_roc.jpg
+
   supervised_report:
     cmd: >
       quarto render reports/templates/${mode}_supervised.qmd
       --output-dir ..
     deps:
       - reports/templates/${mode}_supervised.qmd
-      - artefacts/supervised/${mode}/lda_report.csv
-      - artefacts/supervised/${mode}/qda_report.csv
+      - artefacts/supervised/${mode}/eda.jpg
+      - artefacts/supervised/${mode}/logistic_metrics.csv
+      - artefacts/supervised/${mode}/tree_metrics.csv
+      - artefacts/supervised/${mode}/logistic_roc.jpg
+      - artefacts/supervised/${mode}/tree_roc.jpg
     outs:
-      - reports/${mode}_supervised.html      
+      - reports/${mode}_supervised.html

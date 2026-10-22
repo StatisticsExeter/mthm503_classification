@@ -54,47 +54,46 @@ if(check_exists(report)):
 
 ```
 
-It is always useful to view a scatterplot of the data, marking the two known groups:
+It is always useful to perform some visual exploratory data analysis. For example, here is a scatterplot of the data, marking the two known groups:
 
-![Exploratory Data Analysis Scatterplot](../../artefacts/supervised/lab/scatterplot.jpg)
-
-## Fitting LDA and QDA classifiers
-
-The simplest classifiers we could apply are Linear and Quadratic Discriminant analysis.
-
-### Results from fitting a Linear Discriminant Analysis
+![Exploratory Data Analysis Scatterplot](../../artefacts/supervised/lab/eda.jpg)
 
 
-
-### Results from fitting a Quadratic Discriminant Analysis
-
+## Results from fitting a Partitioning tree classifier
 
 You should comment on these results. You may wish to add an interpretation of the coefficients of these classifiers.
 
-## ROC curve (and AUC) for simple classifiers
+### ROC curve (and AUC) for Partitioning tree
 
 We can examine the AUC for these classifiers to compare their performance across various thresholds.
 
 ```{python}
 #| echo: false
-report = "../../artefacts/supervised/lda_report.csv"
+report = "../../artefacts/supervised/lab/tree_metrics.csv"
 if(check_exists(report)):
     print(pd.read_csv(report))
 
 ```
 
-![ROC Curve Comparison](../../artefacts/supervised/lab/lda_roc.jpg)
 
+![ROC Curve Tree Classifier](../../artefacts/supervised/lab/tree_roc.jpg)
+
+
+## Results from fitting a Logistic Regression Classifier
+
+Metrics are summarised in the table below:
 
 ```{python}
 #| echo: false
-report = "../../artefacts/supervised/qda_report.csv"
+report = "../../artefacts/supervised/lab/logistic_metrics.csv"
 if(check_exists(report)):
     print(pd.read_csv(report))
 
 ```
 
-![ROC Curve Comparison](../../artefacts/supervised/lab/qda_roc.jpg)
+And the ROC curve is given in the figure below:
+
+![ROC Curve Logistic Regression](../../artefacts/supervised/lab/logistic_roc.jpg)
 
 You should comment on the performance of the classifier.
 

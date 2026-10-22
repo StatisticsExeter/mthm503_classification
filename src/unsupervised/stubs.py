@@ -51,9 +51,10 @@ def stub_project_pca(df, n_components=2):
     """
     Creates a simple two-dimensional projection.
     """
-    return pd.DataFrame({"PC1": np.arange(len(df)),
-                         "PC2": np.zeros(len(df))},
-                        index=df.index)
+    n = len(df)
+    return pd.DataFrame({
+        "PC1": np.tile([0, 1], len(df) // 2 + 1)[:n],
+        "PC2": np.tile([10, 20], len(df) // 2 + 1)[:n]}, index=df.index)
 
 
 def stub_get_summary_stats(df):

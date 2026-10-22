@@ -3,10 +3,9 @@ mode: lab
 active:
   supervised_target_variable: "built_age"
 
-
 lab:
   supervised_target_variable: "built_age"
 
 cw:
-  supervised_target_variable: "passenger_injured"
+  supervised_target_variable: "driver_injured"
 

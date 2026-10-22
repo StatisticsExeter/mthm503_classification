@@ -1,5 +1,5 @@
 ---
-title: "Clustering local authorities by residential energy characteristics"
+title: "Are there distinct types of neighbourhood in Hull and East Yorkshire"
 subtitle: "An application of unsupervised learning"
 author: "Anonymous"
 format:
@@ -34,168 +34,256 @@ def check_exists(path):
     return True
 ```
 
+## Overview
 
-## Overview (replace this section)
+This report uses unsupervised learning techniques to investigate whether Lower Layer Super Output Areas (LSOAs) in Hull and the East Riding of Yorkshire can be grouped according to selected demographic, health and socio-economic characteristics derived from the 2021 Census.
 
-Briefly describe the purpose of this report.
-You should state:
+The aim is to identify whether distinct types of neighbourhood emerge naturally from the data without using any predefined labels or outcome variables.
 
-- what is being clustered (local authorities)
-- what the variables represent (typical residential energy characteristics)
-- why clustering is an appropriate tool for this task
+In this section, briefly describe:
 
-Example:
-"This report uses unsupervised learning techniques to explore whether local authorities in England and Wales can be grouped according to the typical energy performance and running costs of residential dwellings."
+- what is being clustered (LSOAs)
+- the characteristics used to describe them
+- why clustering is an appropriate tool for identifying groups of similar neighbourhoods
+
+You may wish to write a short paragraph similar to:
+
+> This report uses unsupervised learning techniques to investigate whether neighbourhoods in Hull and the East Riding of Yorkshire can be grouped according to patterns of health, disability, economic activity and household characteristics. The objective is to explore whether distinct types of communities emerge naturally from the data.
+
 Do not describe code or implementation details here.
 
-##  The data
+## The data
 
-Data source
+The data are derived from the 2021 UK Census and were extracted from a number of published census tables.
 
-The data are derived from Energy Performance Certificates (EPCs) for domestic properties in England and Wales.
-EPC data are publicly available from:
-<https://epc.opendatacommunities.org/>
-Each EPC records information on energy use, carbon emissions, and estimated running costs for an individual dwelling.
+The analysis combines information from five Census 2021 Topic Summary datasets published by the Office for National Statistics (ONS): General Health (TS037), Disability (TS038), Car or Van Availability (TS045), National Statistics Socio-economic Classification (TS062) and Economic Activity Status (TS066). These tables were linked using the LSOA geography code to create a single analysis dataset.
 
-### Aggregation to local authorities
+- TS037 [General health of usual residents](https://www.ons.gov.uk/datasets/TS037)
+- TS038 [Disability status](https://www.ons.gov.uk/datasets/TS038)
+- TS045 [Household car or van availability](https://www.ons.gov.uk/datasets/TS045)
+- TS062 [National Statistics Socio-economic Classification (NS-SEC)](https://www.ons.gov.uk/datasets/TS062)
+- TS066 [Economic activity status (usual residents aged 16+)](https://www.ons.gov.uk/datasets/TS066)
 
-Rather than clustering individual dwellings, the analysis aggregates EPC data to the local authority level.
-Each local authority is treated as a single observation, described by summary statistics representing a typical dwelling in that area.
-For each local authority, the median of selected variables is computed. Medians are used in preference to means to reduce the influence of outliers and skewed distributions.
+
+
+
+
+The analysis focuses on LSOAs located within:
+
+- Kingston upon Hull
+- East Riding of Yorkshire
+
+Each row in the analysis dataset corresponds to a single LSOA.
+
+### Combining Census tables
+
+The dataset was created by joining information from several Census 2021 tables using the LSOA geography code.
+
+The source tables include information on:
+
+- self-reported health
+- disability status
+- vehicle availability
+- socio-economic classification
+- economic activity
+
+The resulting dataset combines measures describing different aspects of neighbourhood composition within a single table suitable for analysis.
 
 ### Variables supplied for analysis
 
-The preprocessing pipeline provides the following five variables:
+The coursework pipeline initially selects the following variables:
 
-- `median_co2_emissions_current`
-- `median_energy_consumption_current`
-- `median_heating_cost_current`
-- `median_hot_water_cost_current`
-- `median_lighting_cost_current`
+- `n_unhealthy`
+- `n_healthy`
+- `n_disabled`
+- `n_no_cars`
+- `n_unskilled`
+- `n_unestablished`
+- `n_long_term_sick`
 
-These correspond to current (observed) values, not hypothetical "potential" improvements.
+These variables represent counts of residents within each LSOA falling into particular Census categories.
 
-### Important:
+### Variable definitions
 
-The Click script used to generate the analysis dataset intentionally restricts the available variables to this small set.   You can modify this script if you wish to work with the "per area" metrics which are extracted by the query. Feature selection is part of the analytical task.
+The supplied variables are derived from Census categories as follows:
 
-You should briefly explain what each variable measures and why it may be informative.
+- `n_unhealthy` – residents reporting bad or very bad health
+- `n_healthy` – residents reporting good or very good health
+- `n_disabled` – residents reporting a disability
+- `n_no_cars` – households with no access to a car or van
+- `n_unskilled` – residents in lower supervisory, semi-routine or routine occupations
+- `n_unestablished` – residents who are students, never worked, or long-term unemployed
+- `n_long_term_sick` – economically inactive residents who report being long-term sick or disabled
 
-## Interpretation of the variables (conceptual, not technical)
+### Important
 
-You should reflect on what these variables capture.
+The default analysis uses these count variables because they are selected in:
 
-###In particular:
+`scripts/unsupervised/01_load_data_cw.py`
 
-- they describe absolute emissions and costs, not efficiency per unit area
-- larger dwellings may therefore appear "worse" even if they are relatively efficient
-- the clustering reflects typical residential impact, not optimal performance
+However, the SQL query used to create the dataset also calculates several proportion variables.
 
-You may comment on alternative representations (e.g. per‑floor‑area metrics), and you may explore these by modifying the click script.
+For example:
 
-##  Exploratory data analysis
+- proportion unhealthy
+- proportion disabled
+- proportion with no vehicle access
+- proportion long-term sick
+
+You are encouraged to consider whether clustering on counts or proportions gives a more meaningful representation of neighbourhood similarity.
+
+Modifying the variable selection is part of the analytical task.
+
+If you choose to experiment with alternative variables, commit your changes regularly to GitHub and explain your decisions in the report.
+
+## Interpretation of the variables
+
+Before clustering, think carefully about what these variables represent.
+
+The supplied variables are counts rather than proportions. As a result:
+
+- larger LSOAs may tend to have larger values for many variables
+- some apparent differences may reflect population size rather than social characteristics
+- highly populated areas may appear similar simply because many counts are large
+
+This means that clusters based on counts may partly reflect neighbourhood size.
+
+Proportion variables may reduce this effect by describing the composition of an area rather than the total number of residents.
+
+You may discuss and explore these issues within your analysis.
+
+## Exploratory data analysis
 
 Before clustering, explore the relationships between the variables.
 
-### You should:
+You should discuss:
 
-- comment on differences in scale between variables
-- explain why scaling or standardisation is required
-- describe any strong correlations you observe
+- differences in scale between variables
+- whether variables appear strongly correlated
+- whether the data contain outliers
+- why standardisation may be required before clustering
 
-You may include scatterplots or a scatter‑matrix to support your discussion such as
+You may include visualisations such as scatterplots, pair plots, histograms or correlation heatmaps.
 
-![Energy usage and building impact metrics](../../artefacts/unsupervised/cw/scatterplot.jpg)
+For example:
 
-but should not include plots without commentary.
+![Exploratory analysis](../../artefacts/unsupervised/cw/scatterplot.jpg)
+
+Do not simply include plots without interpretation.
+
+Explain any interesting patterns you observe and why they might affect the clustering.
 
 ## Hierarchical clustering
 
-Hierarchical clustering allows us to explore similarity between local authorities without pre‑specifying the number of clusters.
+Hierarchical clustering identifies groups of similar LSOAs without requiring the number of clusters to be specified in advance.
 
-### You should:
+You should:
 
-- state which distance metric and linkage method you use
-- briefly justify these choices
+- state the distance metric used
+- state the linkage method used
+- briefly justify your choices
 - explain what the dendrogram represents
 
 ### Dendrogram
 
 ![Hierarchical clustering](../../artefacts/unsupervised/cw/dendrogram.jpg)
 
-You must justify where (and why) you choose to "cut" the dendrogram to form clusters. There is no single correct answer.
+You should justify where you choose to cut the dendrogram and explain why that choice produces a useful clustering solution.
+
+There is no single correct answer.
 
 ## Visualising clusters using PCA
 
-To help interpret the hierarchical clustering, project the data onto the first two Principal Components.
+Principal Components Analysis (PCA) can be used to visualise high-dimensional data in two dimensions.
 
-### You should explain:
+You should explain:
 
 - what PCA does in general terms
-- why it is useful for visualising clustering results
-- whether the projected clusters appear well separated
+- why PCA is useful for visualising clustering results
+- whether the clusters appear well separated
 
 ![PCA, first two dimensions with cluster membership](../../artefacts/unsupervised/cw/hcluster_scatter.jpg)
 
-### K‑Means clustering
+Remember that PCA is a visualisation tool and does not determine the clusters itself.
 
-K‑Means clustering requires the number of clusters k to be chosen in advance.
+## K-Means clustering
 
-### You should:
+K-Means clustering requires the number of clusters to be specified in advance.
 
-- explain how you selected k
-- comment on the stability or sensitivity of the solution
-- interpret the resulting cluster centroids
+You should:
+
+- explain how you selected the number of clusters
+- comment on whether alternative values of k were considered
+- interpret the resulting clusters
 
 ### Cluster centroids
 
-These plots show the average value of each variable within each cluster (in the original units).
-![Summary of cluster centers](../../artefacts/unsupervised/cw/kmeans_1.jpg)
+The centroid plots summarise the average characteristics of each cluster.
 
-Explain what distinguishes the clusters in substantive terms (e.g. higher emissions, higher running costs).
+![Summary of cluster centres](../../artefacts/unsupervised/cw/kmeans_1.jpg)
+
+Discuss:
+
+- which variables distinguish the clusters
+- whether some clusters appear healthier or less healthy
+- whether some clusters appear more affluent or deprived
+- whether the clusters correspond to plausible neighbourhood types
 
 ### PCA visualisation
 
-As with hierarchical clustering, use PCA to visualise the K‑Means solution.
-![First two dimensions of data from PCA with kmeans cluster memberships](../../artefacts/unsupervised/cw/kmeans_scatter.jpg)
+Use PCA to visualise the K-Means solution.
 
-Compare the apparent separation with that observed for hierarchical clustering.
+![First two dimensions of data from PCA with cluster memberships](../../artefacts/unsupervised/cw/kmeans_scatter.jpg)
+
+Comment on whether the clusters appear well separated and compare this with the hierarchical clustering solution.
 
 ## Comparison and interpretation
-Briefly compare the results from hierarchical clustering and K‑Means.
 
-### You may consider:
+Compare the hierarchical clustering and K-Means results.
 
-- whether the methods produce similar groupings
-- which clusters are most interpretable
-- whether some local authorities consistently group together
+You may consider:
 
-Remember: in unsupervised learning, interpretability and justification matter more than finding a "correct" answer.
+- whether both methods produce similar groupings
+- whether certain LSOAs consistently belong together
+- which clustering appears easier to interpret
+- whether differences between methods change your conclusions
+
+Remember that clustering is exploratory. Careful interpretation and justification are more important than finding a single "correct" answer.
 
 ## Limitations and extensions
 
-Discuss limitations of this analysis. Possible points include:
+Discuss limitations of your analysis.
 
-- aggregation masking within‑authority variation
-- sensitivity to variable choice and scaling
-- difficulty in assigning real‑world meaning to clusters
+Possible limitations include:
 
-You may suggest and implement extensions, such as:
+- use of a limited number of Census variables
+- sensitivity to scaling choices
+- use of counts rather than proportions
+- population size influencing the results
+- difficulty assigning real-world meaning to some clusters
 
-- using per‑floor‑area efficiency metrics
-- including additional EPC variables
-- trying alternative clustering methods (e.g. DBSCAN)
+Possible extensions include:
 
-You do not need to implement **all** these to receive full credit.  However, we do wish to see you can extend the pipeline you were given
+- using proportion variables instead of counts
+- including additional Census variables
+- applying alternative clustering methods
+- exploring clusters geographically
+- comparing Hull and East Riding separately
 
-## Conclusion (short)
+You do not need to implement all of these extensions to achieve a high mark. However, you should demonstrate an ability to modify and extend the analysis pipeline where appropriate.
 
+## Conclusion
 
-### Summarise:
+Summarise your findings in three or four sentences.
 
-- what the clustering reveals
-- what remains ambiguous
-- what you would explore next with additional data or methods
+You should briefly state:
+
+- what patterns were identified
+- whether meaningful groups of neighbourhoods emerged
+- what remained uncertain
+- what additional work might improve understanding of the data
+
+Do not introduce new results in the conclusion.
 
 ## Record of AI Use for MTHM503
 

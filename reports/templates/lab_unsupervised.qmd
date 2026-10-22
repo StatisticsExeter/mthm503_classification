@@ -41,24 +41,24 @@ This report explores patterns in police-recorded road collision data (Stats19) t
 
 **Academic Requirement:** You should demonstrate an understanding of *why* we undertake cluster analysis and what the various methods reveal. Specifically, explain how **Principal Component Analysis (PCA)** allows us to project high-dimensional data (multiple collision types) into a 2D plane for visual validation of the clusters.
 
----
 
 ## The Problem
 
 The "Stats19" dataset provides a granular view of road safety in Great Britain, structured into three relational tables: **Accidents**, **Vehicles**, and **Casualties**. These are linked via a unique accident index.
 
 We are interested in identifying "sibling" authorities—those that share similar collision characteristics. For this analysis, we utilize counts of collisions occurring under specific conditions:
-* Mini-roundabouts
-* Adverse weather (Rain)
-* Poor lighting (Dark)
-* Standard conditions (Dry/Urban)
-* Severity profiles (Slight injuries)
+
+- Mini-roundabouts
+- Adverse weather (Rain)
+- Poor lighting (Dark)
+- Standard conditions (Dry/Urban)
+- Severity profiles (Slight injuries)
 
 ### Contextual Research
-* [Cluster analysis in Road Safety](https://ijirt.org/publishedpaper/IJIRT175966_PAPER.pdf)
-* [Pattern Identification via Clustering](https://www.researchgate.net/publication/357727987_Identification_of_Traffic_Accident_Patterns_via_Cluster_Analysis_and_Test_Scenario_Development_for_Autonomous_Vehicles)
 
----
+- [Cluster analysis in Road Safety](https://ijirt.org/publishedpaper/IJIRT175966_PAPER.pdf)
+- [Pattern Identification via Clustering](https://www.researchgate.net/publication/357727987_Identification_of_Traffic_Accident_Patterns_via_Cluster_Analysis_and_Test_Scenario_Development_for_Autonomous_Vehicles)
+
 
 ## Exploratory Data Analysis
 
@@ -66,7 +66,7 @@ Before clustering, we examine the raw relationships between variables. We normal
 
 ![Initial Scatter Matrix of Collision Proportions](../../artefacts/unsupervised/lab/scatterplot.jpg)
 
----
+
 
 ## Hierarchical Clustering
 
@@ -78,11 +78,12 @@ The dendrogram below illustrates the mergers between authorities. You must selec
 ![Dendrogram of Local Authority Clusters](../../artefacts/unsupervised/lab/dendrogram.jpg)
 
 ### Visualizing Cluster Membership (PCA)
+
 To verify if these hierarchical clusters actually represent distinct groups in the data, we project the high-dimensional data onto the first two Principal Components.
 
 ![Hierarchical Clusters projected on PCA Space](../../artefacts/unsupervised/lab/hcluster_scatter.jpg)
 
----
+
 
 ## K-Means Clustering
 
@@ -99,16 +100,17 @@ Again, we use PCA to observe the spatial separation of the K-Means groups.
 
 ![K-Means Clusters projected on PCA Space](../../artefacts/unsupervised/lab/kmeans_scatter.jpg)
 
----
+
 
 ## Additional Credit
 
 To enhance this analysis, consider:
-1.  Implementing a third unsupervised method (e.g., DBSCAN for density-based grouping).
-2.  Expanding the feature set to include road surface types or driver age demographics.
-3.  Answering: *Do the clusters align with known geographical regions, or do they transcend physical boundaries?*
 
----
+- Implementing a third unsupervised method (e.g., DBSCAN for density-based grouping).
+- Expanding the feature set to include road surface types or driver age demographics.
+- Answering: *Do the clusters align with known geographical regions, or do they transcend physical boundaries?*
+
+
 
 ## Record of AI Use for MTHM503
 

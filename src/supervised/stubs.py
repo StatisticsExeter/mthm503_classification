@@ -1,10 +1,20 @@
 import pandas as pd
+import numpy as np
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 
-def stub_perform_split(df, target_col):
-    return (df.drop(columns=[target_col]), df.drop(columns=[target_col]),
-            df[target_col], df[target_col])
+def stub_prepare_features(df, target_var):
+    y = df[target_var]
+    X = pd.DataFrame({"feature_1": np.random.normal(size=len(y)),
+                      "feature_2": np.random.normal(size=len(y))})
+    return X, y
+
+
+def stub_perform_split(X, y):
+    n = len(X)
+    split = int(0.7 * n)
+    return (X.iloc[:split], X.iloc[split:], y.iloc[:split],
+            y.iloc[split:])
 
 
 def stub_classifier(model_type):
@@ -17,13 +27,9 @@ def stub_train_model(X, y, model_obj):
 
 def stub_generate_predictions(X, model):
     n = len(X)
-
     y_pred = ['placeholder'] * n
-
-    y_prob = pd.DataFrame({
-        0: [0.5] * n,
-        1: [0.5] * n
-    }).to_numpy()
+    y_prob = pd.DataFrame({0: [0.5] * n,
+                           1: [0.5] * n}).to_numpy()
     return y_pred, y_prob
 
 
@@ -42,6 +48,10 @@ def stub_get_metrics_df(y_test, y_pred):
         "f1-score": [0.50],
         "support": [len(y_test)]},
         index=["placeholder"])
+
+
+def stub_encode_labels(y):
+    return [0] * len(y)
 
 
 def stub_compute_roc_data(y_test, y_prob):

@@ -5,20 +5,32 @@ from sklearn.discriminant_analysis import (
     LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis)
 from src.supervised.supervised_core import (
     perform_split, get_classifier, train_model, generate_predictions,
-    get_metrics_df, compute_roc_data)
+    get_metrics_df, compute_roc_data, prepare_features, encode_labels)
 
 
 def test_perform_split_stratification():
-    # Create an imbalanced dataset
-    df = pd.DataFrame({
-        'feature': np.random.rand(10),
-        'built_age': [0, 0, 0, 0, 0, 0, 0, 1, 1, 1]
-    })
-    X_train, X_test, y_train, y_test = perform_split(df, 'built_age')
-    # Test 30% split (10 rows * 0.3 = 3 rows in test)
-    assert len(X_test) == 3
-    # Check stratification: y_train should have both classes
+    df = pd.DataFrame({'feature': np.random.rand(100),
+                       'built_age': [0] * 70 + [1] * 30})
+    y = df['built_age']
+    X = df.drop(columns=['built_age'])
+    X_train, X_test, y_train, y_test = perform_split(X, y)
+    assert len(X_test) == 30
+    # Original proportion = 30%
+    assert abs(y_train.mean() - 0.30) < 0.05
+    assert abs(y_test.mean() - 0.30) < 0.05
+    # Stratification should preserve both classes
     assert len(y_train.unique()) == 2
+
+
+def test_prepare_features_creates_dummies():
+    df = pd.DataFrame({
+        "colour": ["red", "blue", "red"],
+        "target": [0, 1, 0]
+    })
+    X, y = prepare_features(df, "target")
+    assert "colour_blue" in X.columns
+    assert "colour_red" in X.columns
+    assert list(y) == [0, 1, 0]
 
 
 def test_get_classifier_types():
@@ -30,6 +42,19 @@ def test_get_classifier_types():
     qda_model = get_classifier('qda')
     assert isinstance(qda_model, QuadraticDiscriminantAnalysis)
     assert qda_model.priors == [0.5, 0.5]
+    logistic_model = get_classifier('logistic')
+    assert isinstance(logistic_model, type(get_classifier('logistic')))
+    assert logistic_model.get_params()['max_iter'] == 1000
+    tree_model = get_classifier('tree')
+    assert isinstance(tree_model, type(get_classifier('tree')))
+    assert tree_model.get_params()['max_depth'] == 5
+
+
+def test_get_classifier_raises_value_error_for_unknown_model():
+    with pytest.raises(ValueError) as exc_info:
+        get_classifier("not_a_real_model")
+
+    assert str(exc_info.value) == "Unknown model_type: not_a_real_model"
 
 
 def test_train_model_logic():
@@ -110,7 +135,7 @@ def test_get_metrics_df_rounding():
 def test_compute_roc_data_logic():
     # 1. Setup string labels and mock probabilities
     # Let's assume 'built_age' classes are 'historic' and 'modern'
-    y_test = ['historic', 'modern', 'historic', 'modern']
+    y_test = [0, 1, 0, 1]
     # Perfect predictions: historic=0.1, modern=0.9
     y_prob = [0.1, 0.9, 0.2, 0.8]
     result = compute_roc_data(y_test, y_prob)
@@ -126,12 +151,6 @@ def test_compute_roc_data_logic():
     assert result['tpr'].iloc[-1] == 1.0
 
 
-def test_compute_roc_data_encoding():
-    # Ensure the LabelEncoder is handling the transformation correctly
-    y_test = ['B', 'A', 'B']
-    y_prob = [0.6, 0.2, 0.7]
-    # If the function fails to encode 'A' and 'B', roc_curve will throw a ValueError
-    try:
-        _ = compute_roc_data(y_test, y_prob)
-    except ValueError as e:
-        pytest.fail(f"compute_roc_data failed to encode string labels: {e}")
+def test_encode_labels():
+    y = ["B", "A", "B"]
+    assert list(encode_labels(y)) == [1, 0, 1]

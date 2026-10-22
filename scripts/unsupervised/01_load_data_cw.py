@@ -10,24 +10,21 @@ if (str(PROJECT_ROOT) not in sys.path):
 # Now we can import any project-specific utilities if needed
 from src.utils import load_duck_data  # noqa: E402
 
-COLUMNS_TO_KEEP = [
-    "median_co2_emissions_current",
-    "median_energy_consumption_current",
-    "median_heating_cost_current",
-    "median_hot_water_cost_current",
-    "median_lighting_cost_current",
-]
+COLUMNS_TO_KEEP = ['geography_code', 'lsoa_name', 'n_unhealthy', 'n_healthy',
+                   'n_disabled', 'n_no_cars', 'n_unskilled', 'n_unestablished',
+                   'n_long_term_sick']
 
 
 @click.command()
 @click.option("--sql-file", type=click.Path(exists=True))
 @click.option("--duck-file", type=click.Path(exists=True))
 @click.option("--output-csv", type=click.Path())
-def main(sql_file, output_csv):
+def main(sql_file, duck_file, output_csv):
     with open(sql_file, 'r') as file:
         query = file.read()
         df = load_duck_data(query, duck_file)
-
+    print(df.head())
+    print(df.columns)
     Path(output_csv).parent.mkdir(parents=True, exist_ok=True)
     missing = set(COLUMNS_TO_KEEP) - set(df.columns)
     if missing:

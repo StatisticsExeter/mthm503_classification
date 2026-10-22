@@ -1,5 +1,5 @@
 ---
-title: "Predicting Passenger Injury in Single Car Road Collisions"
+title: "Predicting Driver Injury in Collisions where a front seat passenger was injured"
 subtitle: "An application of supervised learning"
 author: "Anonymous"
 format:
@@ -35,123 +35,163 @@ def check_exists(path):
 ```
 
 
-## Overview (replace this section)
+## Overview
 
-Briefly describe the aim of this report.
-You should state:
+This report investigates whether it is possible to predict whether a driver was injured in a road traffic collision when an injured front-seat passenger was also present. The analysis uses classification models fitted to road collision data derived from the [UK STATS19](https://www.gov.uk/government/statistical-data-sets/road-safety-open-data) database.
 
-- what is being predicted (passenger injury)
-- what type of data is being used (road collision data)
-- what kind of models you are fitting (classification models)
+In this section, briefly describe:
 
-Example:
+- what is being predicted (driver injury)
+- the type of data being used (road collision data)
+- the purpose of the analysis
+- the classification models fitted
 
-"This report investigates whether it is possible to predict whether a passenger was injured in a road traffic collision using a small number of variables describing the time of the collision, the vehicle, and the driver."
+You may wish to write a short paragraph similar to:
 
-Do not describe code or implementation details here.
+"This report investigates whether it is possible to predict whether a driver was injured in a road traffic collision when an injured front-seat passenger was also present. The analysis uses information describing the collision, vehicle and road environment to build classification models capable of estimating the probability of driver injury.
 
-## The data (edit and expand)
+Do not describe implementation details, code, software, or the modelling pipeline in this section.
+
+## The data
 
 Describe the dataset used in your analysis.
 
-You should mention:
+The analysis is based on data from the UK STATS19 road safety statistics collection. The modelling dataset was created by combining information from multiple STATS19 tables describing:
 
-- the source of the data (STATS19 road collision data)
-- that the data were restricted to single‑vehicle collisions
-- that collisions involving pedestrians were excluded
-- that each row corresponds to a single collision
+- collisions
+- vehicles involved in collisions
+- casualties involved in collisions
 
-List the variables used in the analysis:
+These tables were joined together to create a single analysis dataset suitable for supervised learning.
 
-- `day_of_year`
-- `hour_of_day`
+The data were then restricted to:
+
+- collisions involving an injured front-seat passenger
+
+Each row in the final dataset represents a single driver involved in a qualifying collision.
+
+## Variables
+
+The coursework pipeline initially selects a small set of variables for analysis. At the time of writing these are:
+
+- `driver_injured` (outcome variable)
+- `sex_of_driver`
+- `first_point_of_impact`
+- `road_surface_conditions`
 - `speed_limit`
-- `engine_capacity_cc`
-- `vehicle_age`
-- `driver_age`
-- `passenger_injured` (outcome variable)
+- `road_type`
+- `hour_of_day`
 
-Briefly explain any data cleaning:
+The outcome variable is driver_injured. All remaining variables are used as predictors.
 
-- removal of missing values
-- removal of "unknown" sentinel values (e.g. -1)
+The default variable selection is controlled by the `COLUMNS_TO_KEEP` list in:
 
-You may include a small summary table of group means if helpful.  You may find some other exploratory data analysis informative as well (see later).
+`scripts/supervised/01_load_data_cw.py`
+
+You are encouraged to experiment with alternative predictor variables if you believe they may improve model performance or provide additional insight. If you modify the variable selection, make regular commits to GitHub so that your work is version controlled and changes can be tracked.
+
+## Data preparation
+
+Briefly describe any data preparation performed prior to modelling. This may include:
+
+- handling missing values
+- excluding unknown or invalid values
+- converting categorical variables into indicator (dummy) variables
+- creating derived variables where appropriate
+
+You may also include summary statistics or tables that help describe the data.
 
 ## Class balance (important)
 
 Describe the distribution of the outcome variable.
 
-You should explicitly state:
+You should explicitly identify:
 
-- which class is the majority
-- which class is the minority
+- the majority class
+- the minority class
 - whether the dataset is balanced or imbalanced
 
-Explain why this matters:
+Explain why class balance matters for classification problems.
 
-- why accuracy can be misleading
-- why a trivial classifier might appear to perform well
-- why threshold‑free metrics are useful
+In particular, discuss:
 
-You may not need to "fix" imbalance unless you choose to, but you must acknowledge it.
+- why overall accuracy can be misleading
+- why a classifier that always predicts the majority class may appear successful
+- why threshold-independent measures such as ROC curves and AUC are useful
 
-## Exploratory analysis (describe, do not dump plots)
+You do not need to correct class imbalance unless you choose to, but you should acknowledge its presence and discuss its implications.
 
-Briefly describe any exploratory analysis carried out.
+## Exploratory analysis
 
-![Exploratory Data Analysis Scatterplot](../../artefacts/supervised/cw/scatterplot.jpg)
+Carry out a small amount of exploratory analysis to understand the structure of the data.
 
+The aim of this section is to identify potentially useful patterns rather than to produce a large collection of plots.
 
-If you include scatterplots:
+You may consider:
 
-- explain what is being plotted
-- comment on whether the two classes appear separable
+- summary statistics by outcome group
+- frequency tables for categorical variables
+- simple visualisations of important predictors
+- relationships between predictors and driver injury
 
-You are not expected to show separation here; absence of structure is still a result.
+This coursework uses a mixture of categorical and numerical variables, so scatterplots may not always be the most informative choice.
 
-## Linear Discriminant Analysis (LDA)
+## Exploratory Data Analysis
 
-State that you fitted a Linear Discriminant Analysis classifier.
+If you include visualisations:
+
+- explain what is being shown
+- comment on any patterns that appear relevant
+- discuss whether the classes appear easy or difficult to separate
+
+It is entirely reasonable to conclude that little obvious separation exists. Absence of structure is still a meaningful result.
+
+## Logistic Regression
+
+Fit a Logistic Regression classifier and discuss the results.
+
 You should comment on:
 
-- which variables appear to contribute most strongly
-- whether the direction of effects is plausible
-- whether separation appears weak or strong
+- which variables appear most influential
+- whether the direction of any effects appears plausible
+- whether the model suggests strong or weak separation between classes
 
-Avoid copying large blocks of model output.
-Focus on interpretation, not mechanics.
+Focus on interpretation rather than mechanics.
 
-## Quadratic Discriminant Analysis (QDA)
+Avoid reproducing large blocks of model output. Instead, summarise the aspects of the model that are most relevant to understanding driver injury risk.
 
-State that you also fitted a Quadratic Discriminant Analysis classifier.
-Briefly compare QDA to LDA:
+## Partitioning Tree Classifier
 
-- does it behave differently?
-- does it appear to fit the data better or worse?
-- are there signs of instability or overfitting?
+Fit a Partitioning Tree classifier and compare its behaviour with the Logistic Regression model.
 
-You do not need to prefer QDA over LDA but you do need to justify whatever you observe.
+Possible points to discuss include:
+
+- whether different variables appear important
+- whether the decision rules are easy to interpret
+- whether the model appears to fit the data better or worse
+- whether there are signs of instability or overfitting
+
+You do not need to declare an overall winner, but you should justify any conclusions you draw.
 
 ## Model evaluation (ROC and AUC)
 
-Describe how the classifiers were evaluated.
+Evaluate both classifiers using ROC curves and AUC.
 
 
 ```{python}
 #| echo: false
-report = "../../artefacts/supervised/lda_report.csv"
+report = "../../artefacts/supervised/cw/logistic_metrics.csv"
 if(check_exists(report)):
     print(pd.read_csv(report))
 
 ```
 
 
-![ROC Curve Comparison](../../artefacts/supervised/cw/lda_roc.jpg)
+![ROC Curve Comparison](../../artefacts/supervised/cw/logistic_roc.jpg)
 
 ```{python}
 #| echo: false
-report = "../../artefacts/supervised/qda_report.csv"
+report = "../../artefacts/supervised/cw/tree_metrics.csv"
 if(check_exists(report)):
     print(pd.read_csv(report))
 
@@ -159,56 +199,56 @@ if(check_exists(report)):
 
 
 
-![ROC Curve Comparison](../../artefacts/supervised/cw/qda_roc.jpg)
+![ROC Curve Comparison](../../artefacts/supervised/cw/tree_roc.jpg)
 
 
-You should:
+## Discuss:
 
-- explain what an ROC curve represents (in brief)
-- report AUC values for your models
-- compare performance between models
+- what an ROC curve represents
+- the reported AUC values
+- differences between model performance
+- whether either model performs meaningfully better than random guessing
+- the effect of class imbalance on interpretation
+- whether one classifier clearly dominates the other
 
-Comment on:
+Modest predictive performance is entirely plausible. Avoid overstating conclusions.
 
-- whether performance is meaningfully better than random
-- how class imbalance affects interpretation
-- whether one model clearly dominates
+## Limitations and extensions
 
-Avoid overstating results; modest performance is expected.
+Briefly discuss the limitations of the analysis.
 
-## Limitations and extensions (short but thoughtful)
+### Possible limitations include:
 
-Briefly discuss limitations of this analysis.
-Possible points include:
-
-- limited number of features
-- strong class imbalance
-- simplifying assumptions of the models
+- a limited number of predictor variables
+- class imbalance
+- measurement error in collision data
+- simplifying assumptions made by the models
 - lack of causal interpretation
 
-You may outline possible extensions:
+### Possible extensions include:
 
+- additional predictor variables
 - alternative classifiers
 - feature engineering
-- rebalancing methods
-- different evaluation metrics
+- class rebalancing methods
+- alternative evaluation metrics
 
+Focus on realistic improvements rather than speculative claims.
 
-## Conclusion (very short)
+## Conclusion
 
-Summarise, in 3–4 sentences:
+Summarise your findings in three or four sentences.
 
-- what you attempted
-- what worked reasonably
-- what did not
-- what you would explore next
+You should briefly state:
 
-Do not introduce new results here.
+- what you attempted to predict
+- whether useful predictive performance was achieved
+- the main strengths and weaknesses of the analysis
+- what you would investigate next
 
-Record of AI use (mandatory)
-Complete the table below accurately.
+Do not introduce any new results in the conclusion.
 
-## Record of AI use for MTHM503 supervised coursework
+## Record of AI use (mandatory) MTHM503 supervised coursework
 
 | **Date** | **AI tool used** | **Purpose** | **Prompt** | **Section of work used for** |
 |:---|:---|:---|:---|:---|

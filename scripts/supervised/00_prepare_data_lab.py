@@ -14,7 +14,7 @@ from src.utils import load_pg_data  # noqa: E402
 
 @click.command()
 @click.option("--pgsql-file", type=click.Path(exists=True))
-@click.option("--duck-path", type=click.Path(exists=True))
+@click.option("--duck-path")
 def main(pgsql_file, duck_path):
     query = Path(pgsql_file).read_text()
     df = load_pg_data(query)
@@ -23,6 +23,7 @@ def main(pgsql_file, duck_path):
     cond.register("raw", df)
     cond.execute("""CREATE OR REPLACE TABLE energy_features AS
       SELECT * FROM raw""")
+    cond.unregister("raw")
     print(cond.execute("show tables;").fetchdf())
     print(cond.execute("SELECT * FROM energy_features LIMIT 5").fetchdf())
 

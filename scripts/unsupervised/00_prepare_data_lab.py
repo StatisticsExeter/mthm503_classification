@@ -14,7 +14,7 @@ from src.utils import load_pg_data  # noqa: E402
 
 @click.command()
 @click.option("--pgsql-file", type=click.Path(exists=True))
-@click.option("--duck-path", type=click.Path(exists=True))
+@click.option("--duck-path")
 def main(pgsql_file, duck_path):
     query = Path(pgsql_file).read_text()
     df = load_pg_data(query)
@@ -31,6 +31,7 @@ def main(pgsql_file, duck_path):
       n_urban * 1.0 / n_total AS p_urban,
       n_slight * 1.0 / n_total AS p_slight
   FROM raw""")
+    cond.unregister("raw")
     print(cond.execute("show tables;").fetchdf())
     print(cond.execute("SELECT * FROM collision_features LIMIT 5").fetchdf())
 

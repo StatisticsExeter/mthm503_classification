@@ -154,7 +154,26 @@ def create_boxplot(df, title="Box Plot"):
 
 @fallback_to(stub_get_summary_stats)
 def get_summary_stats(df):
-    """Takes a DataFrame, returns a formatted string."""
+    """
+    Generate a formatted table of summary statistics for a dataset.
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The dataset to summarise. Each numeric column is analysed
+        using pandas' ``describe()`` method.
+    Returns
+    -------
+    str
+        A plain-text table containing common summary statistics for
+        each numeric column, including count, mean, standard deviation,
+        minimum, quartiles, and maximum values. Statistics are rounded
+        to one decimal place and returned as a formatted string suitable
+        for displaying in a terminal, report, or text file.
+    Notes
+    -----
+    Non-numeric columns are handled according to the behaviour of
+    ``pandas.DataFrame.describe()``.
+    """
     raise NotImplementedExercise
 
 

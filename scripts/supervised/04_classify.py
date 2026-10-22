@@ -10,7 +10,7 @@ PROJECT_ROOT = script_path.parents[2]
 if (str(PROJECT_ROOT) not in sys.path):
     sys.path.insert(0, str(PROJECT_ROOT))
 from src.supervised.supervised_core import (  # noqa: E402
-    get_classifier, train_model, generate_predictions)
+    get_classifier, train_model, generate_predictions, MODELS)
 from src.utils import FALLBACKS_USED, report_fallbacks_used
 
 
@@ -23,7 +23,7 @@ def cli():
 @cli.command()
 @click.option('--x-train', type=click.Path(exists=True))
 @click.option('--y-train', type=click.Path(exists=True))
-@click.option('--model-type', type=click.Choice(['lda', 'qda']))
+@click.option('--model-type', type=click.Choice(sorted(MODELS.keys())))
 @click.option('--model-out', type=click.Path())
 def train(x_train, y_train, model_type, model_out):
     clf = get_classifier(model_type)
